@@ -12,7 +12,7 @@ from .types import (
     FlashbotsOpts,
     FlashbotsBundleRawTx,
     FlashbotsBundleTx,
-    FlashbotsBundleDictTx
+    FlashbotsBundleDictTx,
 )
 import time
 
@@ -110,7 +110,7 @@ class Flashbots(Module):
                         gas=tx["gas"],
                         gasPrice=tx["gasPrice"],
                         nonce=tx["nonce"],
-                        to=HexBytes(tx["to"]),
+                        to=HexBytes(tx["to"]) if "to" in tx else None,
                         value=tx["value"],
                     ),
                     (v, r, s),
@@ -121,7 +121,7 @@ class Flashbots(Module):
 
     def to_hex(self, signed_transaction: bytes) -> str:
         tx_hex = signed_transaction.hex()
-        if tx_hex[0:2] != '0x':
+        if tx_hex[0:2] != "0x":
             tx_hex = f"0x{tx_hex}"
         return tx_hex
 
@@ -144,8 +144,7 @@ class Flashbots(Module):
         ]
 
     sendRawBundle: Method[Callable[[Any], Any]] = Method(
-        FlashbotsRPC.eth_sendBundle,
-        mungers=[send_raw_bundle_munger],
+        FlashbotsRPC.eth_sendBundle, mungers=[send_raw_bundle_munger]
     )
     send_raw_bundle = sendRawBundle
 
@@ -247,6 +246,5 @@ class Flashbots(Module):
         return inpt
 
     call_bundle: Method[Callable[[Any], Any]] = Method(
-        json_rpc_method=FlashbotsRPC.eth_callBundle,
-        mungers=[call_bundle_munger],
+        json_rpc_method=FlashbotsRPC.eth_callBundle, mungers=[call_bundle_munger]
     )
