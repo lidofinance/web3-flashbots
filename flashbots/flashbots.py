@@ -88,7 +88,8 @@ class Flashbots(Module):
 
                 # and update the tx details
                 tx["from"] = signer.address
-                tx["gasPrice"] = 0
+                if "type" in tx and tx["type"] != 2 and "gasPrice" in tx:
+                    tx["gasPrice"] = 0
                 if "gas" not in tx:
                     tx["gas"] = self.web3.eth.estimateGas(tx)
                 # sign the tx
@@ -195,6 +196,8 @@ class Flashbots(Module):
             block_timestamp
             if block_timestamp is not None
             else self.extrapolate_timestamp(block_tag, block_details.number)
+            if block_tag is not None
+            else block_details.timestamp
         )
 
         signed_bundled_transactions = self.sign_bundle(bundled_transactions)
