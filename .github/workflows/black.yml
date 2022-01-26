@@ -1,16 +1,9 @@
 name: Black formatting
 
-on:
-  push:
-    branches:
-      - master
-
-  pull_request:
-    branches:
-      - main
+on: push
 
 jobs:
-  build:
+  blackcheck:
     runs-on: ubuntu-latest
 
     steps:
