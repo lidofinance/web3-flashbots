@@ -9,13 +9,16 @@ from .provider import FlashbotProvider
 FLASHBOTS_METHODS = [
     "eth_sendBundle",
     "eth_callBundle",
+    "flashbots_getUserStats",
+    "flashbots_getBundleStats",
 ]
 
 
 def construct_flashbots_middleware(
     flashbots_provider: FlashbotProvider,
 ) -> Middleware:
-    """Captures Flashbots RPC requests and sends them to the Flashbots endpoint
+    """
+    Captures Flashbots RPC requests and sends them to the Flashbots endpoint
     while also injecting the required authorization headers
     Keyword arguments:
     flashbots_provider -- An HTTP provider instantiated with any authorization headers
