@@ -1,8 +1,7 @@
-from typing import Callable
+from typing import Callable, Any
 from web3 import Web3
 from web3.middleware import Middleware
 from web3.types import RPCEndpoint, RPCResponse
-from typing import Any
 from .provider import FlashbotProvider
 
 
@@ -15,7 +14,7 @@ FLASHBOTS_METHODS = [
 
 
 def construct_flashbots_middleware(
-    flashbots_provider: FlashbotProvider,
+        flashbots_provider: FlashbotProvider,
 ) -> Middleware:
     """
     Captures Flashbots RPC requests and sends them to the Flashbots endpoint
@@ -26,14 +25,15 @@ def construct_flashbots_middleware(
     """
 
     def flashbots_middleware(
-        make_request: Callable[[RPCEndpoint, Any], Any], w3: Web3
+            make_request: Callable[[RPCEndpoint, Any], Any],
+            w3: Web3,  # pylint: disable=W0613
     ) -> Callable[[RPCEndpoint, Any], RPCResponse]:
         def middleware(method: RPCEndpoint, params: Any) -> RPCResponse:
             if method not in FLASHBOTS_METHODS:
                 return make_request(method, params)
-            else:
-                # otherwise intercept it and POST it
-                return flashbots_provider.make_request(method, params)
+
+            # otherwise intercept it and POST it
+            return flashbots_provider.make_request(method, params)
 
         return middleware
 

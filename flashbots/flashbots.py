@@ -1,25 +1,22 @@
-import rlp
 import time
 from functools import reduce
-from typing import Any, Dict, List, Optional, Callable, Union
+from typing import List, Any, Union, Dict, Optional, Callable
 
+import rlp
 from eth_account import Account
 from eth_account._utils.legacy_transactions import (
-    Transaction,
-    encode_transaction,
     serializable_unsigned_transaction_from_dict,
+    encode_transaction,
+    Transaction,
 )
-from eth_account._utils.typed_transactions import (
-    AccessListTransaction,
-    DynamicFeeTransaction,
-)
+from eth_account._utils.typed_transactions import AccessListTransaction, DynamicFeeTransaction
 from eth_typing import HexStr
 from hexbytes import HexBytes
 from toolz import dissoc
 from web3 import Web3
 from web3.method import Method
 from web3.module import Module
-from web3.types import RPCEndpoint, Nonce, TxParams, _Hash32
+from web3.types import RPCEndpoint, _Hash32, Nonce, TxParams
 
 from .types import (
     FlashbotsOpts,
@@ -32,7 +29,7 @@ from .types import (
 SECONDS_PER_BLOCK = 15
 
 
-class FlashbotsRPC:
+class FlashbotsRPC:  # pylint: disable=R0903
     eth_sendBundle = RPCEndpoint("eth_sendBundle")
     eth_callBundle = RPCEndpoint("eth_callBundle")
     flashbots_getUserStats = RPCEndpoint("flashbots_getUserStats")
@@ -40,7 +37,7 @@ class FlashbotsRPC:
 
 
 class FlashbotsTransactionResponse:
-    w3: Web3w
+    w3: Web3
     bundle: List[Any]
     target_block_number: int
 
@@ -146,7 +143,8 @@ class Flashbots(Module):
 
         return signed_transactions
 
-    def to_hex(self, signed_transaction: bytes) -> str:
+    @staticmethod
+    def to_hex(signed_transaction: bytes) -> str:
         tx_hex = signed_transaction.hex()
         if tx_hex[0:2] != "0x":
             tx_hex = f"0x{tx_hex}"
@@ -162,7 +160,7 @@ class Flashbots(Module):
         # convert to hex
         return [
             {
-                "txs": list(map(lambda x: self.to_hex(x), signed_bundled_transactions)),
+                "txs": list(map(self.to_hex, signed_bundled_transactions)),
                 "blockNumber": hex(target_block_number),
                 "minTimestamp": opts["minTimestamp"] if opts else 0,
                 "maxTimestamp": opts["maxTimestamp"] if opts else 0,
@@ -187,7 +185,8 @@ class Flashbots(Module):
         )
         return self.send_raw_bundle_munger(signed_txs, target_block_number, opts)
 
-    def raw_bundle_formatter(self, resp) -> Any:
+    @staticmethod
+    def raw_bundle_formatter(resp) -> Any:
         return lambda _: resp.response
 
     sendBundle: Method[Callable[[Any], Any]] = Method(
@@ -197,15 +196,15 @@ class Flashbots(Module):
     )
     send_bundle = sendBundle
 
+    @staticmethod
     def call_bundle_munger(
-            self,
             signed_bundled_transactions: List[
                 Union[FlashbotsBundleTx, FlashbotsBundleRawTx]
             ],
             evm_block_number,
             evm_block_state_number,
             evm_timestamp,
-            opts: Optional[FlashbotsOpts] = None,
+            opts: Optional[FlashbotsOpts] = None,  # pylint: disable=W0613
     ) -> Any:
         """ Given a raw signed bundle, it packages it up with the block number and the timestamps """
         inpt = [
@@ -272,8 +271,9 @@ class Flashbots(Module):
         block_delta = block_tag - latest_block_number
         if block_delta < 0:
             raise Exception("block extrapolation negative")
+
         return self.web3.eth.get_block(latest_block_number)["timestamp"] + (
-                block_delta * SECONDS_PER_BLOCK
+            block_delta * SECONDS_PER_BLOCK
         )
 
     def get_user_stats_munger(self) -> List:
@@ -286,8 +286,10 @@ class Flashbots(Module):
 
     get_user_stats = getUserStats
 
+    @staticmethod
     def get_bundle_stats_munger(
-            self, bundle_hash: Union[str, int], block_number: Union[str, int]
+            bundle_hash: Union[str, int],
+            block_number: Union[str, int],
     ) -> List:
         if isinstance(bundle_hash, int):
             bundle_hash = hex(bundle_hash)
@@ -313,15 +315,15 @@ def _parse_signed_tx(signed_tx: HexBytes) -> TxParams:
         # typed transactions (EIP-2718)
         if tx_type == 1:
             # EIP-2930
-            sedes = AccessListTransaction._signed_transaction_serializer
+            sedes = AccessListTransaction._signed_transaction_serializer  # pylint: disable=W0212
         elif tx_type == 2:
             # EIP-1559
-            sedes = DynamicFeeTransaction._signed_transaction_serializer
+            sedes = DynamicFeeTransaction._signed_transaction_serializer  # pylint: disable=W0212
         else:
             raise ValueError(f"Unknown transaction type: {tx_type}.")
         decoded_tx = rlp.decode(signed_tx[1:], sedes).as_dict()
 
     # recover sender address and remove signature fields
-    decoded_tx["from"] = Account.recover_transaction(signed_tx)
+    decoded_tx["from"] = Account.recover_transaction(signed_tx)  # pylint: disable=E1120
     decoded_tx = dissoc(decoded_tx, "v", "r", "s")
     return decoded_tx
