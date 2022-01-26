@@ -9,7 +9,10 @@ from eth_account._utils.legacy_transactions import (
     encode_transaction,
     Transaction,
 )
-from eth_account._utils.typed_transactions import AccessListTransaction, DynamicFeeTransaction
+from eth_account._utils.typed_transactions import (
+    AccessListTransaction,
+    DynamicFeeTransaction,
+)
 from eth_typing import HexStr
 from hexbytes import HexBytes
 from toolz import dissoc
@@ -54,12 +57,12 @@ class FlashbotsTransactionResponse:
         self.target_block_number = target_block_number
 
     def wait(self) -> None:
-        """ Waits until the target block has been reached """
+        """Waits until the target block has been reached"""
         while self.w3.eth.blockNumber < self.target_block_number:
             time.sleep(1)
 
     def receipts(self) -> List[Union[_Hash32, HexBytes, HexStr]]:
-        """ Returns all the transaction receipts from the submitted bundle """
+        """Returns all the transaction receipts from the submitted bundle"""
         self.wait()
         return list(
             map(lambda tx: self.w3.eth.getTransactionReceipt(tx["hash"]), self.bundle)
@@ -71,12 +74,12 @@ class Flashbots(Module):
     response: FlashbotsTransactionResponse
 
     def sign_bundle(
-            self,
-            bundled_transactions: List[
-                Union[FlashbotsBundleTx, FlashbotsBundleRawTx, FlashbotsBundleDictTx]
-            ],
+        self,
+        bundled_transactions: List[
+            Union[FlashbotsBundleTx, FlashbotsBundleRawTx, FlashbotsBundleDictTx]
+        ],
     ) -> List[HexBytes]:
-        """ Given a bundle of signed and unsigned transactions, it signs them all """
+        """Given a bundle of signed and unsigned transactions, it signs them all"""
         nonces: Dict[HexStr, Nonce] = {}
         signed_transactions: List[HexBytes] = []
 
@@ -151,12 +154,12 @@ class Flashbots(Module):
         return tx_hex
 
     def send_raw_bundle_munger(
-            self,
-            signed_bundled_transactions: List[HexBytes],
-            target_block_number: int,
-            opts: Optional[FlashbotsOpts] = None,
+        self,
+        signed_bundled_transactions: List[HexBytes],
+        target_block_number: int,
+        opts: Optional[FlashbotsOpts] = None,
     ) -> List[Any]:
-        """ Given a raw signed bundle, it packages it up with the block number and the timestamps """
+        """Given a raw signed bundle, it packages it up with the block number and the timestamps"""
         # convert to hex
         return [
             {
@@ -174,10 +177,10 @@ class Flashbots(Module):
     send_raw_bundle = sendRawBundle
 
     def send_bundle_munger(
-            self,
-            bundled_transactions: List[Union[FlashbotsBundleTx, FlashbotsBundleRawTx]],
-            target_block_number: int,
-            opts: Optional[FlashbotsOpts] = None,
+        self,
+        bundled_transactions: List[Union[FlashbotsBundleTx, FlashbotsBundleRawTx]],
+        target_block_number: int,
+        opts: Optional[FlashbotsOpts] = None,
     ) -> List[Any]:
         signed_txs = self.sign_bundle(bundled_transactions)
         self.response = FlashbotsTransactionResponse(
@@ -198,15 +201,15 @@ class Flashbots(Module):
 
     @staticmethod
     def call_bundle_munger(
-            signed_bundled_transactions: List[
-                Union[FlashbotsBundleTx, FlashbotsBundleRawTx]
-            ],
-            evm_block_number,
-            evm_block_state_number,
-            evm_timestamp,
-            opts: Optional[FlashbotsOpts] = None,  # pylint: disable=W0613
+        signed_bundled_transactions: List[
+            Union[FlashbotsBundleTx, FlashbotsBundleRawTx]
+        ],
+        evm_block_number,
+        evm_block_state_number,
+        evm_timestamp,
+        opts: Optional[FlashbotsOpts] = None,  # pylint: disable=W0613
     ) -> Any:
-        """ Given a raw signed bundle, it packages it up with the block number and the timestamps """
+        """Given a raw signed bundle, it packages it up with the block number and the timestamps"""
         inpt = [
             {
                 "txs": list(map(lambda x: x.hex(), signed_bundled_transactions)),
@@ -222,11 +225,11 @@ class Flashbots(Module):
     )
 
     def simulate(
-            self,
-            bundled_transactions,
-            block_tag: int = None,
-            state_block_tag: int = None,
-            block_timestamp: int = None,
+        self,
+        bundled_transactions,
+        block_tag: int = None,
+        state_block_tag: int = None,
+        block_timestamp: int = None,
     ):
         # get block details
         block_details = (
@@ -288,8 +291,8 @@ class Flashbots(Module):
 
     @staticmethod
     def get_bundle_stats_munger(
-            bundle_hash: Union[str, int],
-            block_number: Union[str, int],
+        bundle_hash: Union[str, int],
+        block_number: Union[str, int],
     ) -> List:
         if isinstance(bundle_hash, int):
             bundle_hash = hex(bundle_hash)
@@ -315,10 +318,14 @@ def _parse_signed_tx(signed_tx: HexBytes) -> TxParams:
         # typed transactions (EIP-2718)
         if tx_type == 1:
             # EIP-2930
-            sedes = AccessListTransaction._signed_transaction_serializer  # pylint: disable=W0212
+            sedes = (
+                AccessListTransaction._signed_transaction_serializer
+            )  # pylint: disable=W0212
         elif tx_type == 2:
             # EIP-1559
-            sedes = DynamicFeeTransaction._signed_transaction_serializer  # pylint: disable=W0212
+            sedes = (
+                DynamicFeeTransaction._signed_transaction_serializer
+            )  # pylint: disable=W0212
         else:
             raise ValueError(f"Unknown transaction type: {tx_type}.")
         decoded_tx = rlp.decode(signed_tx[1:], sedes).as_dict()
