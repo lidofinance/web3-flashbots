@@ -25,5 +25,4 @@ jobs:
 
     - name: Analysing the code with pylint
       run: |
-        poetry shell
-        pylint flashbots
+        poetry run pylint flashbots
