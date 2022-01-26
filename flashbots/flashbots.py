@@ -319,13 +319,13 @@ def _parse_signed_tx(signed_tx: HexBytes) -> TxParams:
         if tx_type == 1:
             # EIP-2930
             sedes = (
-                AccessListTransaction._signed_transaction_serializer
-            )  # pylint: disable=W0212
+                AccessListTransaction._signed_transaction_serializer  # pylint: disable=W0212
+            )
         elif tx_type == 2:
             # EIP-1559
             sedes = (
-                DynamicFeeTransaction._signed_transaction_serializer
-            )  # pylint: disable=W0212
+                DynamicFeeTransaction._signed_transaction_serializer  # pylint: disable=W0212
+            )
         else:
             raise ValueError(f"Unknown transaction type: {tx_type}.")
         decoded_tx = rlp.decode(signed_tx[1:], sedes).as_dict()

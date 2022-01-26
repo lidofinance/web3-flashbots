@@ -16,7 +16,7 @@ jobs:
 
     - uses: Gr1N/setup-poetry@v7
     - name: Install dependencies
-      run: poetry install
+      run: poetry install --no-interaction
 
     - name: Install pylint
       run: |
@@ -24,4 +24,6 @@ jobs:
         pip install pylint
 
     - name: Analysing the code with pylint
-      run: pylint flashbots
+      run: |
+        source .venv/bin/activate
+        pylint flashbots
