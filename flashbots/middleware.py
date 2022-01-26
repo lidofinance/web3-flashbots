@@ -14,7 +14,7 @@ FLASHBOTS_METHODS = [
 
 
 def construct_flashbots_middleware(
-        flashbots_provider: FlashbotProvider,
+    flashbots_provider: FlashbotProvider,
 ) -> Middleware:
     """
     Captures Flashbots RPC requests and sends them to the Flashbots endpoint
@@ -25,8 +25,8 @@ def construct_flashbots_middleware(
     """
 
     def flashbots_middleware(
-            make_request: Callable[[RPCEndpoint, Any], Any],
-            w3: Web3,  # pylint: disable=W0613
+        make_request: Callable[[RPCEndpoint, Any], Any],
+        w3: Web3,  # pylint: disable=W0613
     ) -> Callable[[RPCEndpoint, Any], RPCResponse]:
         def middleware(method: RPCEndpoint, params: Any) -> RPCResponse:
             if method not in FLASHBOTS_METHODS:

@@ -11,9 +11,9 @@ from .provider import FlashbotProvider
 
 
 def flashbot(
-        w3: Web3,
-        signature_account: LocalAccount,
-        endpoint_uri: Optional[Union[URI, str]] = None,
+    w3: Web3,
+    signature_account: LocalAccount,
+    endpoint_uri: Optional[Union[URI, str]] = None,
 ):
     """
     Injects the flashbots module and middleware to w3.
