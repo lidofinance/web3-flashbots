@@ -1,5 +1,4 @@
 import logging
-import os
 from typing import Any, Union, Optional
 
 from eth_account.signers.local import LocalAccount
@@ -44,7 +43,8 @@ class FlashbotProvider(HTTPProvider):
             message, private_key=self.signature_account.privateKey.hex()
         )
 
-        headers = self.get_request_headers() | {
+        headers = {
+            **self.get_request_headers(),
             "X-Flashbots-Signature": f"{self.signature_account.address}:{signed_message.signature.hex()}"
         }
 
