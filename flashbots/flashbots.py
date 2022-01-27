@@ -188,7 +188,7 @@ class Flashbots(Module):
         )
         return self.send_raw_bundle_munger(signed_txs, target_block_number, opts)
 
-    def raw_bundle_formatter(self, resp) -> Any:
+    def raw_bundle_formatter(self, resp) -> Any:  # pylint: disable=R0201
         return lambda _: resp.response
 
     sendBundle: Method[Callable[[Any], Any]] = Method(
@@ -198,7 +198,7 @@ class Flashbots(Module):
     )
     send_bundle = sendBundle
 
-    def call_bundle_munger(
+    def call_bundle_munger(  # pylint: disable=R0201
         self,
         signed_bundled_transactions: List[
             Union[FlashbotsBundleTx, FlashbotsBundleRawTx]
@@ -288,7 +288,7 @@ class Flashbots(Module):
 
     get_user_stats = getUserStats
 
-    def get_bundle_stats_munger(
+    def get_bundle_stats_munger(  # pylint: disable=R0201
         self,
         bundle_hash: Union[str, int],
         block_number: Union[str, int],
