@@ -6,7 +6,7 @@ readme = "README.md"
 authors = ["Georgios Konstantopoulos <me@gakonst.com>", "Nikolas Papaioannou <n0k0@hacky.software>"]
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = ">=3.7.10,<4"
 web3 = ">=5.22.0, <6"
 
 [tool.poetry.dev-dependencies]
